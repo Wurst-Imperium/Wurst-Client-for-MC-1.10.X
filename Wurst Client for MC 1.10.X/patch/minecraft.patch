@@ -1,7 +1,7 @@
-From 5e91353edd930b67d9ca80e97531fa6f6e2425f7 Mon Sep 17 00:00:00 2001
-From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Thu, 6 Oct 2016 17:08:08 +0200
-Subject: [PATCH] Wurst
+From 567e0e845ee836839f872f648ad83dd00727415a Mon Sep 17 00:00:00 2001
+From: MrAnyone <m3rc3r99@gmail.com>
+Date: Tue, 11 Oct 2016 21:47:11 -0300
+Subject: [PATCH] time
 
 ---
  src/net/minecraft/block/Block.java                 |  18 +-
@@ -70,8 +70,8 @@ Subject: [PATCH] Wurst
  src/net/minecraft/world/World.java                 |   8 +-
  src/net/minecraft/world/chunk/Chunk.java           |   2 +-
  .../world/gen/structure/MapGenStructure.java       |   6 +-
- src/net/minecraft/world/storage/WorldInfo.java     |  18 +-
- 67 files changed, 1223 insertions(+), 417 deletions(-)
+ src/net/minecraft/world/storage/WorldInfo.java     |  24 ++-
+ 67 files changed, 1229 insertions(+), 417 deletions(-)
 
 diff --git a/src/net/minecraft/block/Block.java b/src/net/minecraft/block/Block.java
 index c58efac..928664e 100644
@@ -153,7 +153,7 @@ index e046c00..fe05932 100644
      }
  
 diff --git a/src/net/minecraft/block/BlockChest.java b/src/net/minecraft/block/BlockChest.java
-index 4760ab1..c441aaa 100644
+index 4760ab1..f54eca5 100644
 --- a/src/net/minecraft/block/BlockChest.java
 +++ b/src/net/minecraft/block/BlockChest.java
 @@ -30,6 +30,7 @@ import net.minecraft.util.math.MathHelper;
@@ -175,7 +175,7 @@ index 4760ab1..c441aaa 100644
  
                  if (this.chestType == BlockChest.Type.BASIC)
 diff --git a/src/net/minecraft/block/BlockLiquid.java b/src/net/minecraft/block/BlockLiquid.java
-index a44acbf..ed8463f 100644
+index a44acbf..aaab52e 100644
 --- a/src/net/minecraft/block/BlockLiquid.java
 +++ b/src/net/minecraft/block/BlockLiquid.java
 @@ -1,7 +1,10 @@
@@ -192,12 +192,12 @@ index a44acbf..ed8463f 100644
 @@ -43,12 +46,16 @@ public abstract class BlockLiquid extends Block
      @Nullable
      public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos)
- 	{
+     {
 -        return NULL_AABB;
 +		// TODO: Client
 +		return WurstClient.INSTANCE.mods.jesusMod.shouldBeSolid()
 +			? FULL_BLOCK_AABB : NULL_AABB;
- 	}
+     }
  
      public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
      {
@@ -268,7 +268,7 @@ index 9d09d2b..83d50eb 100644
          entityIn.motionZ *= 0.4D;
      }
 diff --git a/src/net/minecraft/client/Minecraft.java b/src/net/minecraft/client/Minecraft.java
-index a28c768..7b5b0e8 100644
+index a28c768..7534efb 100644
 --- a/src/net/minecraft/client/Minecraft.java
 +++ b/src/net/minecraft/client/Minecraft.java
 @@ -1,18 +1,5 @@
@@ -582,7 +582,7 @@ index a28c768..7b5b0e8 100644
 +		// TODO: Client
 +		if(this.currentScreen != null
 +			&& !WurstClient.INSTANCE.mods.menuWalkMod.shouldAllowWalking())
- 		{
+         {
 +			
              try
              {
@@ -613,7 +613,7 @@ index a28c768..7b5b0e8 100644
 +		// TODO: Client
 +		if(this.currentScreen == null || this.currentScreen.allowUserInput
 +			|| WurstClient.INSTANCE.mods.menuWalkMod.shouldAllowWalking())
- 		{
+         {
 +			
              this.mcProfiler.endStartSection("mouse");
              this.runTickMouse();
@@ -626,7 +626,7 @@ index a28c768..7b5b0e8 100644
 +			// TODO: Client
 +			if(!this.isGamePaused && this.theWorld != null
 +				&& !WurstClient.INSTANCE.mods.freecamMod.isActive())
- 			{
+             {
 +            	
                  this.theWorld.doVoidFogParticles(MathHelper.floor_double(this.thePlayer.posX), MathHelper.floor_double(this.thePlayer.posY), MathHelper.floor_double(this.thePlayer.posZ));
              }
@@ -767,7 +767,7 @@ index a28c768..7b5b0e8 100644
              public String call()
              {
 diff --git a/src/net/minecraft/client/entity/EntityPlayerSP.java b/src/net/minecraft/client/entity/EntityPlayerSP.java
-index 28bf268..5864eae 100644
+index 28bf268..c60ef33 100644
 --- a/src/net/minecraft/client/entity/EntityPlayerSP.java
 +++ b/src/net/minecraft/client/entity/EntityPlayerSP.java
 @@ -1,7 +1,16 @@
@@ -981,12 +981,12 @@ index 28bf268..5864eae 100644
  
 -    public boolean func_189809_N()
 +    public boolean isAutoJumpEnabled()
- 	{
+     {
 -        return this.field_189811_cr;
 +		// TODO: Client
 +		return this.autoJumpEnabled
 +			&& !WurstClient.INSTANCE.mods.stepMod.isActive();
- 	}
+     }
  
      protected void func_189810_i(float p_189810_1_, float p_189810_2_)
      {
@@ -1021,7 +1021,7 @@ index 66ca54e..bb59e8e 100644
              int j = 14737632;
  
 diff --git a/src/net/minecraft/client/gui/GuiDisconnected.java b/src/net/minecraft/client/gui/GuiDisconnected.java
-index f2fe05e..db97f5f 100644
+index f2fe05e..3003c49 100644
 --- a/src/net/minecraft/client/gui/GuiDisconnected.java
 +++ b/src/net/minecraft/client/gui/GuiDisconnected.java
 @@ -2,6 +2,11 @@ package net.minecraft.client.gui;
@@ -1112,7 +1112,7 @@ index f2fe05e..db97f5f 100644
 +		{
 +			((GuiButton)this.buttonList.get(2)).displayString = "AutoReconnect";
 +		}
- 	}
+     }
  
      /**
 @@ -48,6 +113,28 @@ public class GuiDisconnected extends GuiScreen
@@ -1141,7 +1141,7 @@ index f2fe05e..db97f5f 100644
 +			servers.serverListSelector
 +				.updateOnlineServers(servers.savedServerList);
 +			mc.displayGuiScreen(servers);
- 		}
+         }
      }
  
 diff --git a/src/net/minecraft/client/gui/GuiGameOver.java b/src/net/minecraft/client/gui/GuiGameOver.java
@@ -1197,7 +1197,7 @@ index 356ac50..c710f1f 100644
      }
  }
 diff --git a/src/net/minecraft/client/gui/GuiIngame.java b/src/net/minecraft/client/gui/GuiIngame.java
-index 1148cbb..f194f30 100644
+index 1148cbb..92f70f3 100644
 --- a/src/net/minecraft/client/gui/GuiIngame.java
 +++ b/src/net/minecraft/client/gui/GuiIngame.java
 @@ -4,10 +4,16 @@ import com.google.common.base.Predicate;
@@ -1225,7 +1225,7 @@ index 1148cbb..f194f30 100644
 -        {
 +		// TODO: Client
 +		if(scoreobjective1 != null)
- 			this.renderScoreboard(scoreobjective1, scaledresolution);
+             this.renderScoreboard(scoreobjective1, scaledresolution);
 -        }
 +		else
 +			ArenaBrawlMod.scoreboard = null;
@@ -1371,7 +1371,7 @@ index c667db5..5719742 100644
      }
  }
 diff --git a/src/net/minecraft/client/gui/GuiMainMenu.java b/src/net/minecraft/client/gui/GuiMainMenu.java
-index 9368030..ac3c791 100644
+index 9368030..17329ac 100644
 --- a/src/net/minecraft/client/gui/GuiMainMenu.java
 +++ b/src/net/minecraft/client/gui/GuiMainMenu.java
 @@ -1,6 +1,7 @@
@@ -1425,7 +1425,7 @@ index 9368030..ac3c791 100644
 +		}else if(calendar.get(2) + 1 == 2 && calendar.get(5) == 9)
 +		{
 +			this.splashText = "Happy birthday, Alexander01998!";
- 		}
+         }
 +		ServerHook.setCurrentIpToSingleplayer();
  
          int i = 24;
@@ -1478,7 +1478,7 @@ index cf4ef85..ff974b8 100644
          else if (button.id == 1)
          {
 diff --git a/src/net/minecraft/client/gui/GuiMultiplayer.java b/src/net/minecraft/client/gui/GuiMultiplayer.java
-index 4bc118c..6d496f2 100644
+index 4bc118c..24f44c2 100644
 --- a/src/net/minecraft/client/gui/GuiMultiplayer.java
 +++ b/src/net/minecraft/client/gui/GuiMultiplayer.java
 @@ -2,8 +2,10 @@ package net.minecraft.client.gui;
@@ -1538,7 +1538,7 @@ index 4bc118c..6d496f2 100644
 +        
 +		// TODO: Client
 +		if(serverListSelector != null)
- 			this.serverListSelector.handleMouseInput();
+         this.serverListSelector.handleMouseInput();
      }
  
 @@ -99,6 +116,21 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
@@ -1705,7 +1705,7 @@ index ebd7bc7..9ea3fca 100644
          LOGGER.info("[CHAT] {}", new Object[] {NEWLINE_STRING_JOINER.join(NEWLINE_SPLITTER.split(chatComponent.getUnformattedText()))});
      }
 diff --git a/src/net/minecraft/client/gui/GuiScreenBook.java b/src/net/minecraft/client/gui/GuiScreenBook.java
-index d9bc8e5..4ff48ea 100644
+index d9bc8e5..4f3b5f9 100644
 --- a/src/net/minecraft/client/gui/GuiScreenBook.java
 +++ b/src/net/minecraft/client/gui/GuiScreenBook.java
 @@ -2,10 +2,14 @@ package net.minecraft.client.gui;
@@ -1821,7 +1821,7 @@ index d9bc8e5..4ff48ea 100644
 +			}else if(button.id == 6)
 +			{
 +				mc.displayGuiScreen(new GuiBookHack(this));
- 			}
+             }
  
              this.updateButtons();
          }
@@ -2043,7 +2043,7 @@ index 611699b..4b110f7 100644
       * Draw the foreground layer for the GuiContainer (everything in front of the items)
       */
 diff --git a/src/net/minecraft/client/gui/inventory/GuiContainer.java b/src/net/minecraft/client/gui/inventory/GuiContainer.java
-index ac4a802..ae7de2c 100644
+index ac4a802..39f26c3 100644
 --- a/src/net/minecraft/client/gui/inventory/GuiContainer.java
 +++ b/src/net/minecraft/client/gui/inventory/GuiContainer.java
 @@ -18,6 +18,8 @@ import net.minecraft.item.ItemStack;
@@ -2611,7 +2611,7 @@ index ed45a87..c472319 100644
                                  public String call() throws Exception
                                  {
 diff --git a/src/net/minecraft/client/renderer/BlockModelRenderer.java b/src/net/minecraft/client/renderer/BlockModelRenderer.java
-index 51831cd..1d66418 100644
+index 51831cd..4bd8347 100644
 --- a/src/net/minecraft/client/renderer/BlockModelRenderer.java
 +++ b/src/net/minecraft/client/renderer/BlockModelRenderer.java
 @@ -2,7 +2,11 @@ package net.minecraft.client.renderer;
@@ -2635,15 +2635,15 @@ index 51831cd..1d66418 100644
 +		if(!list1.isEmpty()
 +			&& (!WurstClient.INSTANCE.mods.xRayMod.isActive() || XRayUtils
 +				.isXRayBlock(stateIn.getBlock())))
- 		{
+         {
 -            this.renderQuadsSmooth(worldIn, stateIn, posIn, buffer, list1, afloat, bitset, blockmodelrenderer$ambientocclusionface);
 +			this.renderQuadsSmooth(worldIn, stateIn, posIn, buffer, list1,
 +				afloat, bitset, blockmodelrenderer$ambientocclusionface);
- 			flag = true;
- 		}
+             flag = true;
+         }
  
 diff --git a/src/net/minecraft/client/renderer/EntityRenderer.java b/src/net/minecraft/client/renderer/EntityRenderer.java
-index 5f0a32b..5ae438c 100644
+index 5f0a32b..58a35f4 100644
 --- a/src/net/minecraft/client/renderer/EntityRenderer.java
 +++ b/src/net/minecraft/client/renderer/EntityRenderer.java
 @@ -3,6 +3,7 @@ package net.minecraft.client.renderer;
@@ -2737,16 +2737,16 @@ index 5f0a32b..5ae438c 100644
 +		// TODO: Client
 +		if(this.mc.gameSettings.viewBobbing
 +			&& !WurstClient.INSTANCE.mods.tracersMod.isActive())
- 		{
- 			this.setupViewBobbing(partialTicks);
- 		}
+         {
+             this.setupViewBobbing(partialTicks);
+         }
  
          float f1 = this.mc.thePlayer.prevTimeInPortal + (this.mc.thePlayer.timeInPortal - this.mc.thePlayer.prevTimeInPortal) * partialTicks;
  
 -        if (f1 > 0.0F)
 +		// TODO: Client
 +		if(f1 > 0.0F && !WurstClient.INSTANCE.mods.antiBlindMod.isActive())
- 		{
+         {
 +			
              int i = 20;
  
@@ -2783,7 +2783,7 @@ index 5f0a32b..5ae438c 100644
 +		
 +		// TODO: Client
 +		if(!WurstClient.INSTANCE.mods.caveFinderMod.isActive())
- 			GlStateManager.enableDepth();
+         GlStateManager.enableDepth();
 +		
          GlStateManager.enableAlpha();
          GlStateManager.alphaFunc(516, 0.5F);
@@ -2807,7 +2807,7 @@ index 5f0a32b..5ae438c 100644
 +		if(entity instanceof EntityLivingBase
 +			&& ((EntityLivingBase)entity).isPotionActive(MobEffects.BLINDNESS)
 +			&& !WurstClient.INSTANCE.mods.antiBlindMod.isActive())
- 		{
+         {
 +			
              int i = ((EntityLivingBase)entity).getActivePotionEffect(MobEffects.BLINDNESS).getDuration();
  
@@ -2821,7 +2821,7 @@ index 5f0a32b..5ae438c 100644
 +		if(entity instanceof EntityLivingBase
 +			&& ((EntityLivingBase)entity).isPotionActive(MobEffects.BLINDNESS)
 +			&& !WurstClient.INSTANCE.mods.antiBlindMod.isActive())
- 		{
+         {
 +			
              float f1 = 5.0F;
              int i = ((EntityLivingBase)entity).getActivePotionEffect(MobEffects.BLINDNESS).getDuration();
@@ -3426,7 +3426,7 @@ index 540a2f8..11bfb09 100644
              public String call() throws Exception
              {
 diff --git a/src/net/minecraft/entity/EntityLivingBase.java b/src/net/minecraft/entity/EntityLivingBase.java
-index da801bf..f0149e0 100644
+index da801bf..6311e48 100644
 --- a/src/net/minecraft/entity/EntityLivingBase.java
 +++ b/src/net/minecraft/entity/EntityLivingBase.java
 @@ -2,13 +2,18 @@ package net.minecraft.entity;
@@ -3472,7 +3472,7 @@ index da801bf..f0149e0 100644
 +				|| WurstClient.INSTANCE.mods.noSlowdownMod.isActive()
 +				|| this instanceof EntityPlayer
 +				&& ((EntityPlayer)this).capabilities.isFlying)
- 			{
+             {
 +				
                  if (!this.isInLava() || this instanceof EntityPlayer && ((EntityPlayer)this).capabilities.isFlying)
                  {
@@ -3691,7 +3691,7 @@ index 1949efa..59828e7 100644
                                      public String call() throws Exception
                                      {
 diff --git a/src/net/minecraft/network/play/server/SPacketJoinGame.java b/src/net/minecraft/network/play/server/SPacketJoinGame.java
-index fb9db72..686f68d 100644
+index fb9db72..182b313 100644
 --- a/src/net/minecraft/network/play/server/SPacketJoinGame.java
 +++ b/src/net/minecraft/network/play/server/SPacketJoinGame.java
 @@ -1,6 +1,8 @@
@@ -3874,7 +3874,7 @@ index 0946637..fa98af8 100644
          long j = i - this.lastSyncSysClock;
          long k = System.nanoTime() / 1000000L;
 diff --git a/src/net/minecraft/util/text/TextComponentBase.java b/src/net/minecraft/util/text/TextComponentBase.java
-index 8129b65..5ef6ca9 100644
+index 8129b65..b1a863b 100644
 --- a/src/net/minecraft/util/text/TextComponentBase.java
 +++ b/src/net/minecraft/util/text/TextComponentBase.java
 @@ -3,6 +3,8 @@ package net.minecraft.util.text;
@@ -3892,7 +3892,7 @@ index 8129b65..5ef6ca9 100644
  
 -        for (ITextComponent itextcomponent : this)
 +		try
- 		{
+         {
 -            stringbuilder.append(itextcomponent.getStyle().getFormattingCode());
 -            stringbuilder.append(itextcomponent.getUnformattedComponentText());
 +			for(ITextComponent itextcomponent : this)
@@ -3901,8 +3901,8 @@ index 8129b65..5ef6ca9 100644
 +					.append(itextcomponent.getStyle().getFormattingCode());
 +				stringbuilder
 +					.append(itextcomponent.getUnformattedComponentText());
- 				stringbuilder.append((Object)TextFormatting.RESET);
- 			}
+             stringbuilder.append((Object)TextFormatting.RESET);
+         }
 +		}catch(ConcurrentModificationException e)
 +		{
 +			e.printStackTrace();
@@ -3994,10 +3994,30 @@ index dd0bda3..d940c6c 100644
                      public String call() throws Exception
                      {
 diff --git a/src/net/minecraft/world/storage/WorldInfo.java b/src/net/minecraft/world/storage/WorldInfo.java
-index 8acf00a..55c1863 100644
+index 8acf00a..bc440d1 100644
 --- a/src/net/minecraft/world/storage/WorldInfo.java
 +++ b/src/net/minecraft/world/storage/WorldInfo.java
-@@ -900,49 +900,49 @@ public class WorldInfo
+@@ -20,6 +20,7 @@ import net.minecraft.world.GameRules;
+ import net.minecraft.world.GameType;
+ import net.minecraft.world.WorldSettings;
+ import net.minecraft.world.WorldType;
++import tk.wurst_client.WurstClient;
+ 
+ public class WorldInfo
+ {
+@@ -469,6 +470,11 @@ public class WorldInfo
+      */
+     public long getWorldTime()
+     {
++    	//TODO: Client
++    	if(WurstClient.INSTANCE.mods.timeMod.isEnabled())
++    	{
++    		return WurstClient.INSTANCE.mods.timeMod.time;
++    	}
+         return this.worldTime;
+     }
+ 
+@@ -900,49 +906,49 @@ public class WorldInfo
       */
      public void addToCrashReport(CrashReportCategory category)
      {
@@ -4054,7 +4074,7 @@ index 8acf00a..55c1863 100644
          {
              public String call() throws Exception
              {
-@@ -968,14 +968,14 @@ public class WorldInfo
+@@ -968,14 +974,14 @@ public class WorldInfo
                  return String.format("0x%05X - %s", new Object[] {Integer.valueOf(WorldInfo.this.saveVersion), s});
              }
          });
@@ -4072,5 +4092,5 @@ index 8acf00a..55c1863 100644
              public String call() throws Exception
              {
 -- 
-2.0.0
+2.10.1.windows.1
 

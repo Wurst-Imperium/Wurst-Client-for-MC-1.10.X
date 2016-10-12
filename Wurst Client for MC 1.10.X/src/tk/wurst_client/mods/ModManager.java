@@ -136,6 +136,7 @@ public class ModManager
 	public final SpiderMod spiderMod = new SpiderMod();
 	public final StepMod stepMod = new StepMod();
 	public final ThrowMod throwMod = new ThrowMod();
+	public final TimeMod timeMod = new TimeMod();
 	public final TimerMod timerMod = new TimerMod();
 	public final TiredMod tiredMod = new TiredMod();
 	public final TracersMod tracersMod = new TracersMod();
