@@ -8,9 +8,17 @@
 package tk.wurst_client.mods;
 
 import java.awt.Color;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.SPacketBlockChange;
+import net.minecraft.network.play.server.SPacketBlockAction;
+import net.minecraft.network.play.server.SPacketBlockBreakAnim;
 import net.minecraft.network.play.server.SPacketEffect;
+import net.minecraft.network.play.server.SPacketMultiBlockChange;
+import net.minecraft.network.play.server.SPacketMultiBlockChange.BlockUpdateData;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnGlobalEntity;
 import net.minecraft.util.math.BlockPos;
@@ -30,10 +38,11 @@ import tk.wurst_client.utils.RenderUtils;
 	tags = "player finder",
 	help = "Mods/PlayerFinder")
 @Bypasses
-public class PlayerFinderMod extends Mod implements PacketInputListener,
-	RenderListener
+public class PlayerFinderMod extends Mod
+	implements PacketInputListener, RenderListener
 {
-	private BlockPos blockPos;
+	final Color tracerColor = new Color(0.5f, 0.5f, 0.5f);
+	Map blocksPos = new HashMap();
 	
 	@Override
 	public NavigatorItem[] getSeeAlso()
@@ -45,7 +54,6 @@ public class PlayerFinderMod extends Mod implements PacketInputListener,
 	@Override
 	public void onEnable()
 	{
-		blockPos = null;
 		wurst.events.add(PacketInputListener.class, this);
 		wurst.events.add(RenderListener.class, this);
 	}
@@ -53,23 +61,34 @@ public class PlayerFinderMod extends Mod implements PacketInputListener,
 	@Override
 	public void onRender()
 	{
-		if(blockPos == null)
+		if(blocksPos.size() == 0)
 			return;
-		float red =
-			(1F - (float)Math.sin((float)(System.currentTimeMillis() % 1000L)
-				/ 1000L * Math.PI * 2)) / 2F;
-		float green =
-			(1F - (float)Math
-				.sin((float)((System.currentTimeMillis() + 333L) % 1000L)
-					/ 1000L * Math.PI * 2)) / 2F;
-		float blue =
-			(1F - (float)Math
-				.sin((float)((System.currentTimeMillis() + 666L) % 1000L)
-					/ 1000L * Math.PI * 2)) / 2F;
-		Color color = new Color(red, green, blue);
-		RenderUtils.tracerLine(blockPos.getX(), blockPos.getY(),
-			blockPos.getZ(), color);
-		RenderUtils.blockEsp(blockPos);
+			
+		// Iterates through the hash map, needs the try catch block as sometimes
+		// the this.listenToBlockPosition is called WHILE it is iterating
+		try
+		{
+			Iterator it = blocksPos.entrySet().iterator();
+			while(it.hasNext())
+			{
+				Map.Entry pair = (Map.Entry)it.next();
+				BlockPos pos = (BlockPos)pair.getKey();
+				
+				RenderUtils.tracerLine(pos.getX(), pos.getY(), pos.getZ(),
+					tracerColor);
+				RenderUtils.blockEsp(pos, 0.3, 0.3, 0.3);
+				
+				// Removes the block position if it is older than 20 seconds
+				if((long)pair.getValue() + 20000 <= System.currentTimeMillis())
+				{
+					it.remove();
+				}
+			}
+		}catch(Exception e)
+		{
+			
+		}
+		
 	}
 	
 	@Override
@@ -85,30 +104,77 @@ public class PlayerFinderMod extends Mod implements PacketInputListener,
 		if(mc.thePlayer == null)
 			return;
 		Packet packet = event.getPacket();
-		if(packet instanceof SPacketEffect)
+		if(packet instanceof SPacketBlockAction)
+		{
+			BlockPos pos = ((SPacketBlockAction)packet).getBlockPosition();
+			this.listenToBlockPosition(pos);
+		}else if(packet instanceof SPacketBlockChange)
+		{
+			BlockPos pos = ((SPacketBlockChange)packet).getBlockPosition();
+			this.listenToBlockPosition(pos);
+		}else if(packet instanceof SPacketBlockBreakAnim)
+		{
+			BlockPos pos = ((SPacketBlockBreakAnim)packet).getPosition();
+			this.listenToBlockPosition(pos);
+		}else if(packet instanceof SPacketEffect)
 		{
 			SPacketEffect effect = (SPacketEffect)packet;
 			BlockPos pos = effect.getSoundPos();
-			if(BlockUtils.getPlayerBlockDistance(pos) >= 160)
-				blockPos = pos;
+			this.listenToBlockPosition(pos);
 		}else if(packet instanceof SPacketSoundEffect)
 		{
 			SPacketSoundEffect sound = (SPacketSoundEffect)packet;
 			BlockPos pos =
-				new BlockPos(sound.getX(), sound.getY(),
-					sound.getZ());
-			if(BlockUtils.getPlayerBlockDistance(pos) >= 160)
-				blockPos = pos;
+				new BlockPos(sound.getX(), sound.getY(), sound.getZ());
+			this.listenToBlockPosition(pos);
 		}else if(packet instanceof SPacketSpawnGlobalEntity)
 		{
 			SPacketSpawnGlobalEntity lightning =
 				(SPacketSpawnGlobalEntity)packet;
-			BlockPos pos =
-				new BlockPos(lightning.getX() / 32D,
-					lightning.getY() / 32D,
-					lightning.getZ() / 32D);
-			if(BlockUtils.getPlayerBlockDistance(pos) >= 160)
-				blockPos = pos;
+			BlockPos pos = new BlockPos(lightning.getX() / 32D,
+				lightning.getY() / 32D, lightning.getZ() / 32D);
+			this.listenToBlockPosition(pos);
 		}
+	}
+	
+	// Used to add a position and time added to the hash map if the pos is far
+	// enough
+	public void listenToBlockPosition(BlockPos pos)
+	{
+		if(this.isAGoodBlockPos(pos))
+		{
+			this.blocksPos.put(pos, System.currentTimeMillis());
+		}
+	}
+	
+	// Checks if the given pos isn't too close to another listened pos
+	// and it is not too close to the player
+	// prevents a lot of false positives and "tracers spam"
+	private boolean isAGoodBlockPos(BlockPos testPos)
+	{
+		if(BlockUtils.getHorizontalPlayerBlockDistance(testPos) < 50f)
+		{
+			return false;
+		}
+		
+		try
+		{
+			Iterator it = blocksPos.entrySet().iterator();
+			while(it.hasNext())
+			{
+				Map.Entry pair = (Map.Entry)it.next();
+				BlockPos pos = (BlockPos)pair.getKey();
+				
+				if(BlockUtils.getBlockDistance(pos, testPos) < 10f)
+				{
+					return false;
+				}
+			}
+		}catch(Exception e)
+		{
+			
+		}
+		
+		return true;
 	}
 }
