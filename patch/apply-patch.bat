@@ -9,11 +9,7 @@ rem # Before running this script, the "modded" branch must be created with
 rem # "master" as its source.
 
 cd ..\mc
-git checkout master
-git apply --ignore-space-change --ignore-whitespace ..\patch\minecraft.patch
-xcopy ..\mc ..\tmp /E /Y /I
-git reset --hard
 git checkout modded
-xcopy ..\tmp ..\mc /E /Y /I
-rd /S /Q ..\tmp
+git reset --hard master
+git apply --ignore-space-change --ignore-whitespace ..\patch\minecraft.patch
 rem pause
