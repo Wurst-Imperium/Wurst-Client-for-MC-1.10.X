@@ -1,6 +1,6 @@
-From a6ce24172a94045b9406b07454378bf8936ad23e Mon Sep 17 00:00:00 2001
+From 23935209c22d93ce7788b68b795ce11bcb9f1ab2 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Mon, 10 Oct 2016 06:06:21 +0200
+Date: Wed, 19 Oct 2016 18:00:28 +0200
 Subject: [PATCH] mod
 
 ---
@@ -12,6 +12,7 @@ Subject: [PATCH] mod
  net/minecraft/block/BlockSoulSand.java             |   6 +
  net/minecraft/client/Minecraft.java                | 223 +++++++++++----------
  net/minecraft/client/entity/EntityPlayerSP.java    | 146 ++++++++++++--
+ net/minecraft/client/gui/FontRenderer.java         |   2 +-
  net/minecraft/client/gui/GuiButton.java            |  14 +-
  net/minecraft/client/gui/GuiDisconnected.java      |  87 ++++++++
  net/minecraft/client/gui/GuiGameOver.java          |  14 +-
@@ -45,6 +46,7 @@ Subject: [PATCH] mod
  .../renderer/texture/TextureAtlasSprite.java       |   2 +-
  .../client/renderer/texture/TextureManager.java    |   2 +-
  .../client/renderer/texture/TextureMap.java        |   6 +-
+ .../client/renderer/texture/TextureUtil.java       |   2 +-
  net/minecraft/client/resources/SkinManager.java    |   7 +
  net/minecraft/client/settings/KeyBinding.java      |   2 +-
  net/minecraft/crash/CrashReport.java               |  74 ++++++-
@@ -67,11 +69,11 @@ Subject: [PATCH] mod
  net/minecraft/tileentity/TileEntitySign.java       |   2 +-
  net/minecraft/util/Timer.java                      |   6 +
  net/minecraft/util/text/TextComponentBase.java     |  17 +-
- net/minecraft/world/World.java                     |   8 +-
+ net/minecraft/world/World.java                     |  62 ++++--
  net/minecraft/world/chunk/Chunk.java               |   2 +-
  .../world/gen/structure/MapGenStructure.java       |   6 +-
  net/minecraft/world/storage/WorldInfo.java         |  18 +-
- 67 files changed, 1223 insertions(+), 417 deletions(-)
+ 69 files changed, 1265 insertions(+), 433 deletions(-)
 
 diff --git a/net/minecraft/block/Block.java b/net/minecraft/block/Block.java
 index 25c6330..da46b84 100644
@@ -995,6 +997,19 @@ index 38f8c49..5864eae 100644
          {
              if (this.field_189812_cs <= 0 && this.onGround && !this.isSneaking() && !this.isRiding())
              {
+diff --git a/net/minecraft/client/gui/FontRenderer.java b/net/minecraft/client/gui/FontRenderer.java
+index 6439aa9..aae2a1c 100644
+--- a/net/minecraft/client/gui/FontRenderer.java
++++ b/net/minecraft/client/gui/FontRenderer.java
+@@ -848,7 +848,7 @@ public class FontRenderer implements IResourceManagerReloadListener
+     /**
+      * Inserts newline and formatting into a string to wrap it within the specified width.
+      */
+-    String wrapFormattedStringToWidth(String str, int wrapWidth)
++    protected String wrapFormattedStringToWidth(String str, int wrapWidth)
+     {
+         int i = this.sizeStringToWidth(str, wrapWidth);
+ 
 diff --git a/net/minecraft/client/gui/GuiButton.java b/net/minecraft/client/gui/GuiButton.java
 index 93eccc5..9ee0d1c 100644
 --- a/net/minecraft/client/gui/GuiButton.java
@@ -3010,6 +3025,19 @@ index 9d91fa2..1a44f27 100644
              {
                  public String call() throws Exception
                  {
+diff --git a/net/minecraft/client/renderer/texture/TextureUtil.java b/net/minecraft/client/renderer/texture/TextureUtil.java
+index b0a0490..c5c3031 100644
+--- a/net/minecraft/client/renderer/texture/TextureUtil.java
++++ b/net/minecraft/client/renderer/texture/TextureUtil.java
+@@ -295,7 +295,7 @@ public class TextureUtil
+         DATA_BUFFER.position(0).limit(p_110994_2_);
+     }
+ 
+-    static void bindTexture(int p_94277_0_)
++    public static void bindTexture(int p_94277_0_)
+     {
+         GlStateManager.bindTexture(p_94277_0_);
+     }
 diff --git a/net/minecraft/client/resources/SkinManager.java b/net/minecraft/client/resources/SkinManager.java
 index 6aee323..73e0c0d 100644
 --- a/net/minecraft/client/resources/SkinManager.java
@@ -3912,10 +3940,58 @@ index fb72270..5ef6ca9 100644
          return stringbuilder.toString();
      }
 diff --git a/net/minecraft/world/World.java b/net/minecraft/world/World.java
-index 69679f6..44efd3a 100644
+index 69679f6..316eb71 100644
 --- a/net/minecraft/world/World.java
 +++ b/net/minecraft/world/World.java
-@@ -187,7 +187,7 @@ public abstract class World implements IBlockAccess
+@@ -1,16 +1,19 @@
+ package net.minecraft.world;
+ 
+-import com.google.common.base.Function;
+-import com.google.common.base.Objects;
+-import com.google.common.base.Predicate;
+-import com.google.common.collect.Lists;
+ import java.util.Calendar;
+ import java.util.Collection;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Random;
+ import java.util.UUID;
++
+ import javax.annotation.Nullable;
++
++import com.google.common.base.Function;
++import com.google.common.base.Objects;
++import com.google.common.base.Predicate;
++import com.google.common.collect.Lists;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockLiquid;
+ import net.minecraft.block.material.Material;
+@@ -32,14 +35,7 @@ import net.minecraft.profiler.Profiler;
+ import net.minecraft.scoreboard.Scoreboard;
+ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.tileentity.TileEntity;
+-import net.minecraft.util.EntitySelectors;
+-import net.minecraft.util.EnumFacing;
+-import net.minecraft.util.EnumParticleTypes;
+-import net.minecraft.util.ITickable;
+-import net.minecraft.util.IntHashMap;
+-import net.minecraft.util.ReportedException;
+-import net.minecraft.util.SoundCategory;
+-import net.minecraft.util.SoundEvent;
++import net.minecraft.util.*;
+ import net.minecraft.util.math.AxisAlignedBB;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.MathHelper;
+@@ -56,6 +52,7 @@ import net.minecraft.world.storage.ISaveHandler;
+ import net.minecraft.world.storage.MapStorage;
+ import net.minecraft.world.storage.WorldInfo;
+ import net.minecraft.world.storage.loot.LootTableManager;
++import tk.wurst_client.WurstClient;
+ 
+ public abstract class World implements IBlockAccess
+ {
+@@ -187,7 +184,7 @@ public abstract class World implements IBlockAccess
              {
                  CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting biome");
                  CrashReportCategory crashreportcategory = crashreport.makeCategory("Coordinates of biome request");
@@ -3924,7 +4000,7 @@ index 69679f6..44efd3a 100644
                  {
                      public String call() throws Exception
                      {
-@@ -553,7 +553,7 @@ public abstract class World implements IBlockAccess
+@@ -553,7 +550,7 @@ public abstract class World implements IBlockAccess
              {
                  CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
                  CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
@@ -3933,7 +4009,60 @@ index 69679f6..44efd3a 100644
                  {
                      public String call() throws Exception
                      {
-@@ -3809,14 +3809,14 @@ public abstract class World implements IBlockAccess
+@@ -1573,13 +1570,33 @@ public abstract class World implements IBlockAccess
+      */
+     public float getCelestialAngle(float partialTicks)
+     {
+-        return this.provider.calculateCelestialAngle(this.worldInfo.getWorldTime(), partialTicks);
++		// TODO: Client
++		if(WurstClient.INSTANCE.mods.noWeatherMod.isEnabled()
++			&& WurstClient.INSTANCE.mods.noWeatherMod.changeTime.isChecked())
++		{
++			return this.provider.calculateCelestialAngle(
++				(long)WurstClient.INSTANCE.mods.noWeatherMod.time.getValue(),
++				partialTicks);
++		}else
++		{
++			return this.provider.calculateCelestialAngle(
++				this.worldInfo.getWorldTime(), partialTicks);
++		}
+     }
+ 
+     public int getMoonPhase()
+     {
++		// TODO: Client
++		if(WurstClient.INSTANCE.mods.noWeatherMod.isEnabled()
++			&& WurstClient.INSTANCE.mods.noWeatherMod.changeMoonPhase.isChecked())
++		{
++			return (int)WurstClient.INSTANCE.mods.noWeatherMod.moonPhase
++				.getValue();
++		}else
++		{
+ 			return this.provider.getMoonPhase(this.worldInfo.getWorldTime());
+ 		}
++    }
+ 
+     /**
+      * gets the current fullness of the moon expressed as a float between 1.0 and 0.0, in steps of .25
+@@ -3633,7 +3650,16 @@ public abstract class World implements IBlockAccess
+      */
+     public float getRainStrength(float delta)
+     {
+-        return this.prevRainingStrength + (this.rainingStrength - this.prevRainingStrength) * delta;
++		// TODO: Client
++		if(WurstClient.INSTANCE.mods.noWeatherMod.isEnabled()
++			&& WurstClient.INSTANCE.mods.noWeatherMod.disableRain.isChecked())
++		{
++			return 0;
++		}else
++		{
++			return this.prevRainingStrength
++				+ (this.rainingStrength - this.prevRainingStrength) * delta;
++		}
+     }
+ 
+     /**
+@@ -3809,14 +3835,14 @@ public abstract class World implements IBlockAccess
      {
          CrashReportCategory crashreportcategory = report.makeCategoryDepth("Affected level", 1);
          crashreportcategory.addCrashSection("Level name", this.worldInfo == null ? "????" : this.worldInfo.getWorldName());
