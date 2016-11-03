@@ -1,15 +1,28 @@
 /*
  * Copyright © 2014 - 2016 | Wurst-Imperium | All rights reserved.
- * 
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package tk.wurst_client.utils;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_LINES;
+import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glDepthMask;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glEnd;
+import static org.lwjgl.opengl.GL11.glLineWidth;
+import static org.lwjgl.opengl.GL11.glVertex3d;
 
 import java.awt.Color;
+
+import org.darkstorm.minecraft.gui.util.RenderUtil;
+import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
@@ -21,9 +34,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-
-import org.darkstorm.minecraft.gui.util.RenderUtil;
-import org.lwjgl.opengl.GL11;
 
 public class RenderUtils
 {
@@ -64,7 +74,7 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
+
 	/**
 	 * Renders a frame with any size and any color.
 	 *
@@ -98,7 +108,7 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
+
 	/**
 	 * Renders a green ESP box with the size of a normal block at the specified
 	 * BlockPos.
@@ -107,7 +117,7 @@ public class RenderUtils
 	{
 		blockEsp(blockPos, 0, 1, 0);
 	}
-	
+
 	/**
 	 * Renders an ESP box with the size of a normal block at the specified
 	 * BlockPos.
@@ -138,7 +148,7 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
+
 	public static void blockEspFrame(BlockPos blockPos, double red,
 		double green, double blue)
 	{
@@ -162,9 +172,9 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
-	public static void blockEspBox(BlockPos blockPos, double red,
-		double green, double blue)
+
+	public static void blockEspBox(BlockPos blockPos, double red, double green,
+		double blue)
 	{
 		double x = blockPos.getX()
 			- Minecraft.getMinecraft().getRenderManager().renderPosX;
@@ -186,7 +196,7 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
+
 	public static void emptyBlockESPBox(BlockPos blockPos)
 	{
 		double x = blockPos.getX()
@@ -209,13 +219,13 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
+
 	public static int enemy = 0;
 	public static int friend = 1;
 	public static int other = 2;
 	public static int target = 3;
 	public static int team = 4;
-	
+
 	public static void entityESPBox(Entity entity, int mode)
 	{
 		GL11.glBlendFunc(770, 771);
@@ -259,7 +269,7 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
+
 	public static void nukerBox(BlockPos blockPos, float damage)
 	{
 		double x = blockPos.getX()
@@ -289,7 +299,7 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
+
 	public static void searchBox(BlockPos blockPos)
 	{
 		double x = blockPos.getX()
@@ -318,7 +328,7 @@ public class RenderUtils
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL_BLEND);
 	}
-	
+
 	public static void drawColorBox(AxisAlignedBB axisalignedbb, float red,
 		float green, float blue, float alpha)
 	{
@@ -433,7 +443,7 @@ public class RenderUtils
 			.color(red, green, blue, alpha).endVertex();
 		ts.draw();// Ends Z.
 	}
-	
+
 	public static void tracerLine(Entity entity, int mode)
 	{
 		double x = entity.posX
@@ -463,13 +473,13 @@ public class RenderUtils
 			GL11.glColor4d(1, 0, 0, 0.5F);
 		else if(mode == 4)// Team
 			GL11.glColor4d(0, 1, 0, 0.5F);
-		
+
 		Vec3d eyes = new Vec3d(0, 0, 1)
 			.rotatePitch(-(float)Math
 				.toRadians(Minecraft.getMinecraft().thePlayer.rotationPitch))
 			.rotateYaw(-(float)Math
 				.toRadians(Minecraft.getMinecraft().thePlayer.rotationYaw));
-		
+
 		glBegin(GL_LINES);
 		{
 			glVertex3d(eyes.xCoord,
@@ -483,7 +493,7 @@ public class RenderUtils
 		glDepthMask(true);
 		glDisable(GL_BLEND);
 	}
-	
+
 	public static void tracerLine(Entity entity, Color color)
 	{
 		double x = entity.posX
@@ -510,8 +520,8 @@ public class RenderUtils
 		glDepthMask(true);
 		glDisable(GL_BLEND);
 	}
-	
-	public static void tracerLine(int x, int y, int z, Color color)
+
+	public static void tracerLine(double x, double y, double z, Color color)
 	{
 		x += 0.5 - Minecraft.getMinecraft().getRenderManager().renderPosX;
 		y += 0.5 - Minecraft.getMinecraft().getRenderManager().renderPosY;
@@ -523,9 +533,17 @@ public class RenderUtils
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(false);
 		RenderUtil.setColor(color);
+		Vec3d eyes = new Vec3d(0, 0, 1)
+			.rotatePitch(-(float)Math
+				.toRadians(Minecraft.getMinecraft().thePlayer.rotationPitch))
+			.rotateYaw(-(float)Math
+				.toRadians(Minecraft.getMinecraft().thePlayer.rotationYaw));
+
 		glBegin(GL_LINES);
 		{
-			glVertex3d(0, Minecraft.getMinecraft().thePlayer.getEyeHeight(), 0);
+			glVertex3d(eyes.xCoord,
+				Minecraft.getMinecraft().thePlayer.getEyeHeight() + eyes.yCoord,
+				eyes.zCoord);
 			glVertex3d(x, y, z);
 		}
 		glEnd();
@@ -534,7 +552,7 @@ public class RenderUtils
 		glDepthMask(true);
 		glDisable(GL_BLEND);
 	}
-	
+
 	public static void drawSelectionBoundingBox(AxisAlignedBB boundingBox)
 	{
 		Tessellator tessellator = Tessellator.getInstance();

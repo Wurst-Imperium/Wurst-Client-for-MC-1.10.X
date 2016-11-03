@@ -101,6 +101,15 @@ public class BlockUtils
 				* (yDiff - 0.5F) + (zDiff - 0.5F) * (zDiff - 0.5F));
 	}
 	
+	public static float getBlockDistance(BlockPos pos1, BlockPos pos2)
+	{
+		float xDiff = Math.abs(pos1.getX() - pos2.getX());
+		float zDiff = Math.abs(pos1.getZ() - pos2.getZ());
+		float yDiff = Math.abs(pos1.getY() - pos2.getY());
+		
+		return getBlockDistance(xDiff, yDiff, zDiff);
+	}
+	
 	public static float getHorizontalPlayerBlockDistance(BlockPos blockPos)
 	{
 		float xDiff =
