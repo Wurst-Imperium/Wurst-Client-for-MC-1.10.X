@@ -9,6 +9,8 @@ package tk.wurst_client.mods;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.EnumHand;
+import net.minecraft.world.GameType;
+import tk.wurst_client.events.listeners.GameModeChangeListener;
 import tk.wurst_client.events.listeners.UpdateListener;
 import tk.wurst_client.mods.Mod.Bypasses;
 import tk.wurst_client.mods.Mod.Info;
@@ -25,8 +27,12 @@ import tk.wurst_client.utils.EntityUtils;
 	tags = "kill aura",
 	help = "Mods/Killaura")
 @Bypasses
-public class KillauraMod extends Mod implements UpdateListener
+public class KillauraMod extends Mod implements UpdateListener, GameModeChangeListener
 {
+	
+	// This flag is set if a GameModeChangeListener was added
+	private boolean gameModeChangeListenerAdded = false;
+	
 	public CheckboxSetting useCooldown = new CheckboxSetting(
 		"Use Attack Cooldown as Speed", true)
 	{
@@ -79,6 +85,11 @@ public class KillauraMod extends Mod implements UpdateListener
 		if(wurst.mods.triggerBotMod.isEnabled())
 			wurst.mods.triggerBotMod.setEnabled(false);
 		wurst.events.add(UpdateListener.class, this);
+		if (!this.gameModeChangeListenerAdded)
+		{
+			wurst.events.add(GameModeChangeListener.class, this);
+			this.gameModeChangeListenerAdded = true;
+		}
 	}
 	
 	@Override
@@ -144,6 +155,17 @@ public class KillauraMod extends Mod implements UpdateListener
 				range.lockToMax(4.25);
 				hitThroughWalls.lock(false);
 				break;
+		}
+	}
+
+	@Override
+	public void onGameModeChange(GameType type)
+	{
+		if (type == GameType.SPECTATOR)
+			this.setBlocked(true);
+		else
+		{
+			this.setBlocked(false);
 		}
 	}
 }
