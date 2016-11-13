@@ -8,6 +8,7 @@
 package tk.wurst_client.mods;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -204,8 +205,26 @@ public class ModManager implements ModToggleListener
 	{
 		if(event.isEnabling())
 		{
+			// only one conflicting mod can be enabled a the same time.
+			Mod disabledMod = null;
+			
 			for(Mod conflictingMod : getConflicts(event.getModule()))
-				conflictingMod.setEnabled(false);
+			{
+				if(conflictingMod.isEnabled())
+				{
+					disabledMod = conflictingMod;
+					conflictingMod.setEnabled(false);
+				}
+			}
+			
+			if(disabledMod != null)
+			{
+				WurstClient.INSTANCE.chat.message(
+					"The mod " + disabledMod.getName()
+					+ " has been disabled because it conflicts with "
+					+ event.getModule().getName() + "."
+				);
+			}
 		}
 	}
 	
