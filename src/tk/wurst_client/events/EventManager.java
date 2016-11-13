@@ -38,6 +38,7 @@ public final class EventManager
 			new ArrayList<PacketOutputListener>());
 		listenerMap.put(RenderListener.class, new ArrayList<RenderListener>());
 		listenerMap.put(UpdateListener.class, new ArrayList<UpdateListener>());
+		listenerMap.put(ModToggleListener.class, new ArrayList<ModToggleListener>());
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -8,11 +8,19 @@
 package tk.wurst_client.mods;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.TreeMap;
 
-public class ModManager
+import org.apache.commons.lang3.ArrayUtils;
+
+import tk.wurst_client.WurstClient;
+import tk.wurst_client.events.ModToggleEvent;
+import tk.wurst_client.events.listeners.ModToggleListener;
+
+public class ModManager implements ModToggleListener
 {
 	private final TreeMap<String, Mod> mods = new TreeMap<String, Mod>(
 		new Comparator<String>()
@@ -149,6 +157,58 @@ public class ModManager
 	public final TunnellerMod tunnellerMod = new TunnellerMod();
 	public final XRayMod xRayMod = new XRayMod();
 	
+	private final List<Mod[]> conflictingMods = Arrays.asList(new Mod[][]
+		{
+			{
+				clickAuraMod,
+				killauraLegitMod,
+				killauraMod,
+				multiAuraMod,
+				tpAuraMod,
+				triggerBotMod
+			},
+			{
+				flightMod,
+				jetpackMod
+			},
+			{
+				tunnellerMod,
+				speedNukerMod,
+				nukerMod,
+				nukerLegitMod
+			}
+		});
+	
+	public Mod[] getConflicts(Mod module)
+	{
+		for(Mod[] conflicts : this.conflictingMods)
+		{
+			if(ArrayUtils.contains(conflicts, module))
+			{
+				Mod[] filteredMods = new Mod[conflicts.length - 1];
+				
+				int i = 0;
+				for(Mod mod : conflicts)
+					if(mod != module)
+						filteredMods[i++] = mod;
+				
+				return filteredMods;
+			}
+		}
+		
+		return new Mod[0];
+	}
+	
+	@Override
+	public void onModuleToggle(ModToggleEvent event)
+	{
+		if(event.isEnabling())
+		{
+			for(Mod conflictingMod : getConflicts(event.getModule()))
+				conflictingMod.setEnabled(false);
+		}
+	}
+	
 	public ModManager()
 	{
 		try
@@ -164,6 +224,8 @@ public class ModManager
 		{
 			e.printStackTrace();
 		}
+		
+		WurstClient.INSTANCE.events.add(ModToggleListener.class, this);
 	}
 	
 	public Mod getModByName(String name)
