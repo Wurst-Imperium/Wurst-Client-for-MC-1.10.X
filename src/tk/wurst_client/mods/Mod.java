@@ -18,6 +18,7 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.util.ReportedException;
 import tk.wurst_client.WurstClient;
+import tk.wurst_client.events.ModToggleEvent;
 import tk.wurst_client.navigator.NavigatorItem;
 import tk.wurst_client.navigator.PossibleKeybind;
 import tk.wurst_client.navigator.settings.NavigatorSetting;
@@ -163,6 +164,11 @@ public class Mod implements NavigatorItem
 	
 	public final void setEnabled(boolean enabled)
 	{
+		ModToggleEvent event = new ModToggleEvent(this, enabled);
+		wurst.events.fire(event);
+		if(event.isCancelled())
+			return;
+		
 		this.enabled = enabled;
 		active = enabled && !blocked;
 		if(blocked && enabled)
