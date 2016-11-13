@@ -36,8 +36,8 @@ public class SpfManager
 	{
 		try
 		{
-			for(Field field : SpfManager.class.getFields())
-				if(field.getName().endsWith("Spf"))
+			for(Field field : SpfManager.class.getDeclaredFields())
+				if(Spf.class.isAssignableFrom(field.getType()))
 				{
 					Spf spf = (Spf)field.get(this);
 					features.put(spf.getName(), spf);
