@@ -144,6 +144,12 @@ public class Mod implements NavigatorItem
 	{
 		return bypasses;
 	}
+
+	@Override
+	public NavigatorItem[] getConflicts()
+	{
+		return wurst.mods.getConflicts(this);
+	}
 	
 	@Override
 	public NavigatorItem[] getSeeAlso()
