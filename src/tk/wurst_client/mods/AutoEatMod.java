@@ -14,6 +14,7 @@ import tk.wurst_client.events.listeners.UpdateListener;
 import tk.wurst_client.mods.Mod.Bypasses;
 import tk.wurst_client.mods.Mod.Info;
 import tk.wurst_client.navigator.NavigatorItem;
+import tk.wurst_client.navigator.settings.CheckboxSetting;
 
 @Info(
 	description = "Automatically eats food when necessary.",
@@ -25,6 +26,22 @@ public class AutoEatMod extends Mod implements UpdateListener
 {
 	private int oldSlot;
 	private int bestSlot;
+	public boolean useLowestSaturation;
+	
+	@Override
+	public void initSettings()
+	{
+		settings.add(new CheckboxSetting(
+			"Eat items that give low Food Points first (use to clean up your inventory)",
+			false)
+		{
+			@Override
+			public void update()
+			{
+				useLowestSaturation = isChecked();
+			}
+		});
+	}
 	
 	@Override
 	public NavigatorItem[] getSeeAlso()
@@ -45,7 +62,7 @@ public class AutoEatMod extends Mod implements UpdateListener
 		if(oldSlot != -1 || mc.thePlayer.capabilities.isCreativeMode
 			|| mc.thePlayer.getFoodStats().getFoodLevel() >= 20)
 			return;
-		float bestSaturation = 0F;
+		float bestSaturation = useLowestSaturation? 10F : 0F;
 		bestSlot = -1;
 		for(int i = 0; i < 9; i++)
 		{
@@ -56,10 +73,21 @@ public class AutoEatMod extends Mod implements UpdateListener
 			if(item.getItem() instanceof ItemFood)
 				saturation =
 					((ItemFood)item.getItem()).getSaturationModifier(item);
-			if(saturation > bestSaturation)
+			if(useLowestSaturation)
 			{
-				bestSaturation = saturation;
-				bestSlot = i;
+ 				if(saturation < bestSaturation && saturation != 0.0F)
+				{
+					bestSaturation = saturation;
+					bestSlot = i;
+				}
+			}
+			else
+			{
+				if(saturation > bestSaturation)
+				{
+					bestSaturation = saturation;
+					bestSlot = i;
+				}
 			}
 		}
 		if(bestSlot == -1)
