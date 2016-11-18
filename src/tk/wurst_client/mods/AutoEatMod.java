@@ -73,21 +73,12 @@ public class AutoEatMod extends Mod implements UpdateListener
 			if(item.getItem() instanceof ItemFood)
 				saturation =
 					((ItemFood)item.getItem()).getSaturationModifier(item);
-			if(useLowestSaturation)
+			if(useLowestSaturation
+				? saturation < bestSaturation && saturation != 0.0F
+				: saturation > bestSaturation)
 			{
- 				if(saturation < bestSaturation && saturation != 0.0F)
-				{
-					bestSaturation = saturation;
-					bestSlot = i;
-				}
-			}
-			else
-			{
-				if(saturation > bestSaturation)
-				{
-					bestSaturation = saturation;
-					bestSlot = i;
-				}
+				bestSaturation = saturation;
+				bestSlot = i;
 			}
 		}
 		if(bestSlot == -1)
