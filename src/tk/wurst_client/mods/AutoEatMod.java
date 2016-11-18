@@ -67,14 +67,11 @@ public class AutoEatMod extends Mod implements UpdateListener
 		for(int i = 0; i < 9; i++)
 		{
 			ItemStack item = mc.thePlayer.inventory.getStackInSlot(i);
-			if(item == null)
+			if(item == null || !(item.getItem() instanceof ItemFood))
 				continue;
-			float saturation = 0;
-			if(item.getItem() instanceof ItemFood)
-				saturation =
-					((ItemFood)item.getItem()).getSaturationModifier(item);
-			if(useLowestSaturation
-				? saturation < bestSaturation && saturation != 0.0F
+			float saturation =
+				((ItemFood)item.getItem()).getSaturationModifier(item);
+			if(useLowestSaturation ? saturation < bestSaturation
 				: saturation > bestSaturation)
 			{
 				bestSaturation = saturation;
