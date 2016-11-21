@@ -135,6 +135,7 @@ public class ModManager
 	public final SpeedHackMod speedHackMod = new SpeedHackMod();
 	public final SpeedNukerMod speedNukerMod = new SpeedNukerMod();
 	public final SpiderMod spiderMod = new SpiderMod();
+	public final StashEspMod stashEspMod = new StashEspMod();
 	public final StepMod stepMod = new StepMod();
 	public final ThrowMod throwMod = new ThrowMod();
 	public final TimerMod timerMod = new TimerMod();
