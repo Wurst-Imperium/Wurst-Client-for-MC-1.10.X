@@ -9,6 +9,7 @@ package tk.wurst_client.utils;
 
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.GridLayout;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -23,7 +24,10 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import net.minecraft.util.Util;
 
@@ -77,6 +81,23 @@ public class MiscUtils
 		}catch(Exception e)
 		{
 			logger.error("Failed to open link", e);
+			
+			class OpenLinkFailedPanel extends JPanel
+			{
+				private static final long serialVersionUID = 1L;
+				
+				public OpenLinkFailedPanel()
+				{
+					setLayout(new GridLayout(2, 0));
+					
+					add(new JLabel("Wurst failed to open a link in your web browser"));
+					add(new JTextField(url));
+				}
+				
+			}
+			JOptionPane.showMessageDialog(null, new OpenLinkFailedPanel(),
+				"ERROR", JOptionPane.ERROR_MESSAGE);
+			
 			return false;
 		}
 	}
