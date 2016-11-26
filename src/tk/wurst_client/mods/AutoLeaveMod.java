@@ -109,7 +109,7 @@ public class AutoLeaveMod extends Mod implements UpdateListener
 	
 	public void setMode(int mode)
 	{
-		((ModeSetting)settings.get(1)).setSelected(mode);
+		((ModeSetting)settings.get(0)).setSelected(mode);
 	}
 	
 	public String[] getModes()
