@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2016 | Wurst-Imperium | All rights reserved.
+ * Copyright Â© 2014 - 2016 | Wurst-Imperium | All rights reserved.
  * 
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -26,7 +26,7 @@ public enum WurstClient
 {
 	INSTANCE;
 	
-	public static final String VERSION = "4.7";
+	public static final String VERSION = "4.8beta";
 	public static final String MINECRAFT_VERSION = "1.10";
 	
 	public AnalyticsManager analytics;

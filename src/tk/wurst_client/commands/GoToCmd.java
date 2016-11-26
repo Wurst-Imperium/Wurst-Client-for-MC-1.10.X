@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2016 | Wurst-Imperium | All rights reserved.
+ * Copyright Â© 2014 - 2016 | Wurst-Imperium | All rights reserved.
  * 
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -249,6 +249,12 @@ public class GoToCmd extends Cmd implements UpdateListener
 		
 		wurst.events.remove(UpdateListener.class, this);
 		enabled = false;
+		mc.gameSettings.keyBindForward.pressed = false;
+		mc.gameSettings.keyBindBack.pressed = false;
+		mc.gameSettings.keyBindRight.pressed = false;
+		mc.gameSettings.keyBindLeft.pressed = false;
+		mc.gameSettings.keyBindJump.pressed = false;
+		mc.gameSettings.keyBindSneak.pressed = false;
 	}
 	
 	public boolean isActive()
