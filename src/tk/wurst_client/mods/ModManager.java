@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2016 | Wurst-Imperium | All rights reserved.
+ * Copyright Â© 2014 - 2016 | Wurst-Imperium | All rights reserved.
  * 
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -152,8 +152,8 @@ public class ModManager
 	{
 		try
 		{
-			for(Field field : ModManager.class.getFields())
-				if(field.getName().endsWith("Mod"))
+			for(Field field : ModManager.class.getDeclaredFields())
+				if(Mod.class.isAssignableFrom(field.getType()))
 				{
 					Mod mod = (Mod)field.get(this);
 					mods.put(mod.getName(), mod);
