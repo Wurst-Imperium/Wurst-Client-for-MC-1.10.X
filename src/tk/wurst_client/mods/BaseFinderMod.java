@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2016 | Wurst-Imperium | All rights reserved.
+ * Copyright Â© 2014 - 2016 | Wurst-Imperium | All rights reserved.
  * 
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,7 +7,11 @@
  */
 package tk.wurst_client.mods;
 
-import java.util.ArrayList;
+import static net.minecraft.init.Blocks.*;
+
+import java.util.*;
+
+import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
@@ -27,12 +31,17 @@ import tk.wurst_client.utils.RenderUtils;
 public class BaseFinderMod extends Mod implements UpdateListener,
 	RenderListener
 {
-	public BaseFinderMod()
-	{
-		initBlocks();
-	}
 	
-	private ArrayList<Block> naturalBlocks = new ArrayList<Block>();
+	private Collection<Block> naturalBlocks = Sets.newHashSet(
+		AIR, STONE, DIRT, GRASS, GRAVEL, SAND, CLAY, SANDSTONE,
+		FLOWING_WATER, WATER, FLOWING_LAVA, LAVA, LOG, LOG2, LEAVES,
+		LEAVES2, DEADBUSH, IRON_ORE, COAL_ORE, GOLD_ORE, DIAMOND_ORE,
+		EMERALD_ORE, REDSTONE_ORE, LAPIS_ORE, BEDROCK, MOB_SPAWNER,
+		MOSSY_COBBLESTONE, TALLGRASS, YELLOW_FLOWER, RED_FLOWER, WEB,
+		BROWN_MUSHROOM, RED_MUSHROOM, SNOW_LAYER, VINE, WATERLILY,
+		DOUBLE_PLANT, HARDENED_CLAY, RED_SANDSTONE, ICE, QUARTZ_ORE,
+		OBSIDIAN, MONSTER_EGG, RED_MUSHROOM_BLOCK, BROWN_MUSHROOM_BLOCK
+	);
 	private ArrayList<BlockPos> matchingBlocks = new ArrayList<BlockPos>();
 	private int range = 50;
 	private int maxBlocks = 1024;
@@ -60,39 +69,47 @@ public class BaseFinderMod extends Mod implements UpdateListener,
 		if(hasTimePassedM(3000))
 		{
 			matchingBlocks.clear();
+			
+			int playerX = (int) Math.floor(mc.thePlayer.posX);
+			int playerY = (int) Math.floor(mc.thePlayer.posY);
+			int playerZ = (int) Math.floor(mc.thePlayer.posZ);
+
 			for(int y = range; y >= -range; y--)
-			{
 				for(int x = range; x >= -range; x--)
-				{
 					for(int z = range; z >= -range; z--)
 					{
-						int posX = (int)(mc.thePlayer.posX + x);
-						int posY = (int)(mc.thePlayer.posY + y);
-						int posZ = (int)(mc.thePlayer.posZ + z);
+						int posX = playerX + x;
+						int posY = playerY + y;
+						int posZ = playerZ + z;
 						BlockPos pos = new BlockPos(posX, posY, posZ);
 						if(!naturalBlocks.contains(mc.theWorld.getBlockState(
 							pos).getBlock()))
+						{
 							matchingBlocks.add(pos);
-						if(matchingBlocks.size() >= maxBlocks)
-							break;
+							
+							if(foundTooManyBlocks())
+								break;
+						}
 					}
-					if(matchingBlocks.size() >= maxBlocks)
-						break;
-				}
-				if(matchingBlocks.size() >= maxBlocks)
-					break;
-			}
-			if(matchingBlocks.size() >= maxBlocks && shouldInform)
+			
+			if(foundTooManyBlocks())
 			{
-				wurst.chat.warning(getName() + " found §lA LOT§r of blocks.");
-				wurst.chat
+				if(shouldInform) {
+					wurst.chat.warning(getName() + " found Â§lA LOTÂ§r of blocks.");
+					wurst.chat
 					.message("To prevent lag, it will only show the first "
 						+ maxBlocks + " blocks.");
-				shouldInform = false;
-			}else if(matchingBlocks.size() < maxBlocks)
+					shouldInform = false;
+				}
+			} else
 				shouldInform = true;
+			
 			updateLastMS();
 		}
+	}
+	
+	private boolean foundTooManyBlocks() {
+		return matchingBlocks.size() >= maxBlocks;
 	}
 	
 	@Override
@@ -102,52 +119,4 @@ public class BaseFinderMod extends Mod implements UpdateListener,
 		wurst.events.remove(RenderListener.class, this);
 	}
 	
-	private void initBlocks()
-	{
-		naturalBlocks.add(Block.getBlockFromName("air"));
-		naturalBlocks.add(Block.getBlockFromName("stone"));
-		naturalBlocks.add(Block.getBlockFromName("dirt"));
-		naturalBlocks.add(Block.getBlockFromName("grass"));
-		naturalBlocks.add(Block.getBlockFromName("gravel"));
-		naturalBlocks.add(Block.getBlockFromName("sand"));
-		naturalBlocks.add(Block.getBlockFromName("clay"));
-		naturalBlocks.add(Block.getBlockFromName("sandstone"));
-		naturalBlocks.add(Block.getBlockById(8));
-		naturalBlocks.add(Block.getBlockById(9));
-		naturalBlocks.add(Block.getBlockById(10));
-		naturalBlocks.add(Block.getBlockById(11));
-		naturalBlocks.add(Block.getBlockFromName("log"));
-		naturalBlocks.add(Block.getBlockFromName("log2"));
-		naturalBlocks.add(Block.getBlockFromName("leaves"));
-		naturalBlocks.add(Block.getBlockFromName("leaves2"));
-		naturalBlocks.add(Block.getBlockFromName("deadbush"));
-		naturalBlocks.add(Block.getBlockFromName("iron_ore"));
-		naturalBlocks.add(Block.getBlockFromName("coal_ore"));
-		naturalBlocks.add(Block.getBlockFromName("gold_ore"));
-		naturalBlocks.add(Block.getBlockFromName("diamond_ore"));
-		naturalBlocks.add(Block.getBlockFromName("emerald_ore"));
-		naturalBlocks.add(Block.getBlockFromName("redstone_ore"));
-		naturalBlocks.add(Block.getBlockFromName("lapis_ore"));
-		naturalBlocks.add(Block.getBlockFromName("bedrock"));
-		naturalBlocks.add(Block.getBlockFromName("mob_spawner"));
-		naturalBlocks.add(Block.getBlockFromName("mossy_cobblestone"));
-		naturalBlocks.add(Block.getBlockFromName("tallgrass"));
-		naturalBlocks.add(Block.getBlockFromName("yellow_flower"));
-		naturalBlocks.add(Block.getBlockFromName("red_flower"));
-		naturalBlocks.add(Block.getBlockFromName("cobweb"));
-		naturalBlocks.add(Block.getBlockFromName("brown_mushroom"));
-		naturalBlocks.add(Block.getBlockFromName("red_mushroom"));
-		naturalBlocks.add(Block.getBlockFromName("snow_layer"));
-		naturalBlocks.add(Block.getBlockFromName("vine"));
-		naturalBlocks.add(Block.getBlockFromName("waterlily"));
-		naturalBlocks.add(Block.getBlockFromName("double_plant"));
-		naturalBlocks.add(Block.getBlockFromName("hardened_clay"));
-		naturalBlocks.add(Block.getBlockFromName("red_sandstone"));
-		naturalBlocks.add(Block.getBlockFromName("ice"));
-		naturalBlocks.add(Block.getBlockFromName("quartz_ore"));
-		naturalBlocks.add(Block.getBlockFromName("obsidian"));
-		naturalBlocks.add(Block.getBlockFromName("monster_egg"));
-		naturalBlocks.add(Block.getBlockFromName("red_mushroom_block"));
-		naturalBlocks.add(Block.getBlockFromName("brown_mushroom_block"));
-	}
 }
