@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2016 | Wurst-Imperium | All rights reserved.
+ * Copyright Â© 2014 - 2016 | Wurst-Imperium | All rights reserved.
  * 
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -84,15 +84,18 @@ public class BaseFinderMod extends Mod implements UpdateListener,
 						BlockPos pos = new BlockPos(posX, posY, posZ);
 						if(!naturalBlocks.contains(mc.theWorld.getBlockState(
 							pos).getBlock()))
+						{
 							matchingBlocks.add(pos);
-						if(foundTooManyBlocks())
-							break;
+							
+							if(foundTooManyBlocks())
+								break;
+						}
 					}
 			
 			if(foundTooManyBlocks())
 			{
 				if(shouldInform) {
-					wurst.chat.warning(getName() + " found §lA LOT§r of blocks.");
+					wurst.chat.warning(getName() + " found Â§lA LOTÂ§r of blocks.");
 					wurst.chat
 					.message("To prevent lag, it will only show the first "
 						+ maxBlocks + " blocks.");
