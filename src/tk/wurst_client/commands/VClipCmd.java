@@ -21,9 +21,9 @@ public class VClipCmd extends Cmd
 	{
 		if(args.length != 1)
 			syntaxError();
-		if(MiscUtils.isInteger(args[0]))
+		if(MiscUtils.isDouble(args[0]))
 			mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY
-				+ Integer.valueOf(args[0]), mc.thePlayer.posZ);
+				+ Double.valueOf(args[0]), mc.thePlayer.posZ);
 		else
 			syntaxError();
 	}
