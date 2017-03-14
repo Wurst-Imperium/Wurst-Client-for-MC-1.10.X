@@ -40,12 +40,6 @@ public class TunnellerMod extends Mod implements RenderListener, UpdateListener
 	@Override
 	public void onEnable()
 	{
-		if(wurst.mods.nukerMod.isEnabled())
-			wurst.mods.nukerMod.setEnabled(false);
-		if(wurst.mods.nukerLegitMod.isEnabled())
-			wurst.mods.nukerLegitMod.setEnabled(false);
-		if(wurst.mods.speedNukerMod.isEnabled())
-			wurst.mods.speedNukerMod.setEnabled(false);
 		wurst.events.add(UpdateListener.class, this);
 		wurst.events.add(RenderListener.class, this);
 	}

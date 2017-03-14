@@ -189,6 +189,25 @@ public class NavigatorFeatureScreen extends NavigatorScreen
 			}
 		}
 		
+		// conflicts
+		NavigatorItem[] conflicts = item.getConflicts();
+		if(conflicts.length != 0)
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.append("\n\nConflicts: ");
+			
+			int conflictCount = conflicts.length;
+			for(int i = 0; i < conflictCount; i++)
+			{
+				sb.append(conflicts[i].getName());
+				
+				sb.append(i == conflictCount - 1 ? " " : ", ");
+			}
+			
+			sb.append("\n");
+			text += sb.toString();
+		}
+		
 		// see also
 		NavigatorItem[] seeAlso = item.getSeeAlso();
 		if(seeAlso.length != 0)

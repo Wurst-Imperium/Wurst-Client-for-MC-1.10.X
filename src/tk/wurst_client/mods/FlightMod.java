@@ -55,9 +55,6 @@ public class FlightMod extends Mod implements UpdateListener
 	@Override
 	public void onEnable()
 	{
-		if(wurst.mods.jetpackMod.isEnabled())
-			wurst.mods.jetpackMod.setEnabled(false);
-		
 		if(wurst.special.yesCheatSpf.getBypassLevel().ordinal() >= BypassLevel.MINEPLEX_ANTICHEAT
 			.ordinal())
 		{

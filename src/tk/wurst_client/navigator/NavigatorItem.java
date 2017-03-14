@@ -35,5 +35,9 @@ public interface NavigatorItem
 	
 	public String getHelpPage();
 	
+	public default NavigatorItem[] getConflicts() {
+		return new NavigatorItem[0];
+	};
+	
 	public NavigatorItem[] getSeeAlso();
 }
