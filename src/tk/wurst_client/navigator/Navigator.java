@@ -29,50 +29,11 @@ public class Navigator
 	
 	public Navigator()
 	{
-		// add mods
-		Field[] modFields = ModManager.class.getFields();
-		try
-		{
-			for(Field field : modFields)
-			{
-				if(field.getName().endsWith("Mod"))
-					navigatorList.add((NavigatorItem)field
-						.get(WurstClient.INSTANCE.mods));
-			}
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+		WurstClient wurst = WurstClient.INSTANCE;
 		
-		// add commands
-		Field[] cmdFields = CmdManager.class.getFields();
-		try
-		{
-			for(Field field : cmdFields)
-			{
-				if(field.getName().endsWith("Cmd"))
-					navigatorList.add((NavigatorItem)field
-						.get(WurstClient.INSTANCE.commands));
-			}
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		// add special features
-		Field[] specialFields = SpfManager.class.getFields();
-		try
-		{
-			for(Field field : specialFields)
-			{
-				if(field.getName().endsWith("Spf"))
-					navigatorList.add((NavigatorItem)field
-						.get(WurstClient.INSTANCE.special));
-			}
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+		navigatorList.addAll(wurst.mods.getAllMods());
+		navigatorList.addAll(wurst.commands.getAllCommands());		
+		navigatorList.addAll(wurst.special.getAllFeatures());
 	}
 	
 	public void copyNavigatorList(ArrayList<NavigatorItem> list)
