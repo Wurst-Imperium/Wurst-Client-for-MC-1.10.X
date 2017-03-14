@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagString;
 import tk.wurst_client.commands.Cmd.Info;
 
-@Info(description = "Changes the held book's author.",
+@Info(description = "Changes the held book's author. Use $ for colors, use $$ for $.",
 	name = "author",
 	syntax = {"<author>"},
 	help = "Commands/author")
@@ -28,7 +28,7 @@ public class AuthorCmd extends Cmd
 		ItemStack item = mc.thePlayer.inventory.getCurrentItem();
 		if(item == null || Item.getIdFromItem(item.getItem()) != 387)
 			error("You are not holding a written book in your hand.");
-		String author = args[0];
+		String author = args[0].replace("$", "§").replace("§§", "$");
 		for(int i = 1; i < args.length; i++)
 			author += " " + args[i];
 		item.setTagInfo("author", new NBTTagString(author));
