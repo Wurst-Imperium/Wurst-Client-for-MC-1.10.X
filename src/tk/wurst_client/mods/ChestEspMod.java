@@ -41,7 +41,7 @@ public class ChestEspMod extends Mod implements RenderListener
 	@Override
 	public NavigatorItem[] getSeeAlso()
 	{
-		return new NavigatorItem[]{wurst.mods.itemEspMod, wurst.mods.searchMod,
+		return new NavigatorItem[]{wurst.mods.stashEspMod, wurst.mods.itemEspMod, wurst.mods.searchMod,
 			wurst.mods.xRayMod};
 	}
 	
