@@ -11,12 +11,6 @@ git init
 git add .
 git commit -a -m "Initial commit"
 git checkout -b modded
-git checkout master
 git apply --ignore-space-change --ignore-whitespace ..\patch\minecraft.patch
-xcopy ..\mc ..\tmp /E /Y /I
-git reset --hard
-git checkout modded
-xcopy ..\tmp ..\mc /E /Y /I
-rd /S /Q ..\tmp
 git commit -a -m "Add Wurst changes"
 rem pause
